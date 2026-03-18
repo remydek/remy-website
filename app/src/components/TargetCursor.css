@@ -1,0 +1,48 @@
+.target-cursor-wrapper {
+  position: fixed;
+  top: 0;
+  left: 0;
+  z-index: 99;
+  pointer-events: none;
+  mix-blend-mode: difference;
+}
+
+.target-cursor-dot {
+  width: 8px;
+  height: 8px;
+  background: white;
+  border-radius: 50%;
+  position: absolute;
+  top: 50%;
+  left: 50%;
+  transform: translate(-50%, -50%);
+}
+
+.target-cursor-corner {
+  position: absolute;
+  width: 12px;
+  height: 12px;
+  top: 50%;
+  left: 50%;
+  transform: translate(-50%, -50%);
+}
+
+.corner-tl {
+  border-top: 3px solid white;
+  border-left: 3px solid white;
+}
+
+.corner-tr {
+  border-top: 3px solid white;
+  border-right: 3px solid white;
+}
+
+.corner-br {
+  border-bottom: 3px solid white;
+  border-right: 3px solid white;
+}
+
+.corner-bl {
+  border-bottom: 3px solid white;
+  border-left: 3px solid white;
+}
