@@ -57,8 +57,8 @@ export default function CursorModel() {
       smoothPos.current.y += (pos.current.y - smoothPos.current.y) * 0.12;
 
       if (containerRef.current) {
-        // Offset so the 3D cursor trails below and slightly right of the actual cursor
-        containerRef.current.style.transform = `translate(${smoothPos.current.x - CURSOR_SIZE / 2 + 30}px, ${smoothPos.current.y - CURSOR_SIZE / 2 + 50}px)`;
+        // Offset so the 3D cursor trails well below the white dot cursor
+        containerRef.current.style.transform = `translate(${smoothPos.current.x - CURSOR_SIZE / 2 + 80}px, ${smoothPos.current.y - CURSOR_SIZE / 2 + 220}px)`;
       }
       rafRef.current = requestAnimationFrame(animate);
     };
