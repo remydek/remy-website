@@ -31,7 +31,7 @@ function Cursor3D() {
 
   return (
     <Center>
-      <group scale={[4, 4, 4]}>
+      <group scale={[2.8, 2.8, 2.8]}>
         <primitive object={scene} />
       </group>
     </Center>
@@ -40,8 +40,10 @@ function Cursor3D() {
 
 export default function CursorModel() {
   const containerRef = useRef<HTMLDivElement>(null);
+  const dotRef = useRef<HTMLDivElement>(null);
   const pos = useRef({ x: -CURSOR_SIZE, y: -CURSOR_SIZE });
   const smoothPos = useRef({ x: -CURSOR_SIZE, y: -CURSOR_SIZE });
+  const dotPos = useRef({ x: -20, y: -20 });
   const rafRef = useRef<number>(0);
 
   const handleMouseMove = useCallback((e: MouseEvent) => {
@@ -53,12 +55,20 @@ export default function CursorModel() {
     window.addEventListener('mousemove', handleMouseMove);
 
     const animate = () => {
-      smoothPos.current.x += (pos.current.x - smoothPos.current.x) * 0.12;
-      smoothPos.current.y += (pos.current.y - smoothPos.current.y) * 0.12;
+      // White dot follows mouse with fast easing
+      dotPos.current.x += (pos.current.x - dotPos.current.x) * 0.45;
+      dotPos.current.y += (pos.current.y - dotPos.current.y) * 0.45;
+
+      if (dotRef.current) {
+        dotRef.current.style.transform = `translate(${dotPos.current.x - 6}px, ${dotPos.current.y - 6}px)`;
+      }
+
+      // 3D cursor follows with slower easing (trails behind)
+      smoothPos.current.x += (pos.current.x - smoothPos.current.x) * 0.08;
+      smoothPos.current.y += (pos.current.y - smoothPos.current.y) * 0.08;
 
       if (containerRef.current) {
-        // Offset so the 3D cursor trails well below the white dot cursor
-        containerRef.current.style.transform = `translate(${smoothPos.current.x - CURSOR_SIZE / 2 + 80}px, ${smoothPos.current.y - CURSOR_SIZE / 2 + 220}px)`;
+        containerRef.current.style.transform = `translate(${smoothPos.current.x - CURSOR_SIZE / 2 + 50}px, ${smoothPos.current.y - CURSOR_SIZE / 2 + 130}px)`;
       }
       rafRef.current = requestAnimationFrame(animate);
     };
@@ -71,6 +81,26 @@ export default function CursorModel() {
   }, [handleMouseMove]);
 
   return (
+    <>
+    {/* White circular cursor dot */}
+    <div
+      ref={dotRef}
+      style={{
+        position: 'fixed',
+        left: 0,
+        top: 0,
+        width: 12,
+        height: 12,
+        borderRadius: '50%',
+        background: 'white',
+        zIndex: 10,
+        pointerEvents: 'none',
+        willChange: 'transform',
+        boxShadow: '0 0 8px rgba(255,255,255,0.4), 0 0 20px rgba(255,255,255,0.15)',
+        mixBlendMode: 'difference',
+      }}
+    />
+    {/* 3D cursor that follows the dot */}
     <div
       ref={containerRef}
       style={{
@@ -103,6 +133,7 @@ export default function CursorModel() {
         </Canvas>
       </Suspense>
     </div>
+    </>
   );
 }
 

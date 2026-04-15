@@ -1,204 +1,313 @@
 'use client';
 
-import { useEffect, useRef, useState } from 'react';
-import gsap from 'gsap';
+import { useEffect, useState, useCallback } from 'react';
 
-export default function ContactModal({ open, onClose }: { open: boolean; onClose: () => void }) {
-  const overlayRef = useRef<HTMLDivElement>(null);
-  const panelRef = useRef<HTMLDivElement>(null);
-  const emailRef = useRef<HTMLInputElement>(null);
-  const [email, setEmail] = useState('');
-  const [message, setMessage] = useState('');
-  const [sending, setSending] = useState(false);
+interface ContactModalProps {
+  isOpen: boolean;
+  onClose: () => void;
+}
+
+export default function ContactModal({ isOpen, onClose }: ContactModalProps) {
+  const [formData, setFormData] = useState({ name: '', email: '', message: '' });
+  const [focused, setFocused] = useState<string | null>(null);
   const [sent, setSent] = useState(false);
+  const [visible, setVisible] = useState(false);
+  const [animate, setAnimate] = useState(false);
+
+  const handleChange = useCallback((field: string, value: string) => {
+    setFormData(prev => ({ ...prev, [field]: value }));
+  }, []);
+
+  const handleSubmit = useCallback((e: React.FormEvent) => {
+    e.preventDefault();
+    const { name, email, message } = formData;
+    const subject = encodeURIComponent(`Message from ${name || 'Website Visitor'}`);
+    const body = encodeURIComponent(`Name: ${name}\nEmail: ${email}\n\n${message}`);
+    window.open(`mailto:remy@augmento.com?subject=${subject}&body=${body}`, '_self');
+    setSent(true);
+    setTimeout(() => {
+      setSent(false);
+      setFormData({ name: '', email: '', message: '' });
+      onClose();
+    }, 2200);
+  }, [formData, onClose]);
 
   useEffect(() => {
-    if (open) {
+    if (isOpen) {
       setSent(false);
-      // Show normal cursor when modal is open
-      document.body.style.cursor = 'auto';
-      gsap.to(overlayRef.current, { opacity: 1, duration: 0.4, ease: 'power2.out', pointerEvents: 'auto' });
-      gsap.fromTo(panelRef.current, { y: 40, opacity: 0, scale: 0.97 }, { y: 0, opacity: 1, scale: 1, duration: 0.5, ease: 'power3.out', delay: 0.1 });
-      // Auto-focus email field
-      setTimeout(() => emailRef.current?.focus(), 500);
+      setVisible(true);
     } else {
-      // Restore hidden cursor
-      document.body.style.cursor = 'none';
-      gsap.to(overlayRef.current, { opacity: 0, duration: 0.3, ease: 'power2.in', pointerEvents: 'none' });
-      gsap.to(panelRef.current, { y: 20, opacity: 0, scale: 0.97, duration: 0.25, ease: 'power2.in' });
+      setAnimate(false);
+      const timeout = setTimeout(() => setVisible(false), 400);
+      return () => clearTimeout(timeout);
     }
-  }, [open]);
+  }, [isOpen]);
 
-  const handleSubmit = async (e: React.FormEvent) => {
-    e.preventDefault();
-    if (!email || !message) return;
-    setSending(true);
-    // Placeholder — will wire up Resend later
-    await new Promise((r) => setTimeout(r, 1000));
-    setSending(false);
-    setSent(true);
-    setEmail('');
-    setMessage('');
-  };
+  // Separate effect: when visible becomes true, trigger animate on next tick
+  useEffect(() => {
+    if (visible && isOpen) {
+      const timeout = setTimeout(() => setAnimate(true), 20);
+      return () => clearTimeout(timeout);
+    }
+  }, [visible, isOpen]);
+
+  const handleOverlayClick = useCallback((e: React.MouseEvent) => {
+    if (e.target === e.currentTarget) onClose();
+  }, [onClose]);
+
+  const isUp = (field: string) => focused === field || formData[field as keyof typeof formData].length > 0;
+
+  if (!visible) return null;
 
   return (
     <div
-      ref={overlayRef}
-      className="fixed inset-0 z-[200] flex items-center justify-center"
-      style={{ opacity: 0, pointerEvents: 'none' }}
-      onClick={(e) => { if (e.target === overlayRef.current) onClose(); }}
+      onClick={handleOverlayClick}
+      style={{
+        position: 'fixed',
+        inset: 0,
+        zIndex: 50,
+        display: 'flex',
+        alignItems: 'center',
+        justifyContent: 'center',
+        background: 'rgba(2, 2, 2, 0.72)',
+        backdropFilter: 'blur(14px) saturate(0.7)',
+        WebkitBackdropFilter: 'blur(14px) saturate(0.7)',
+        cursor: 'auto',
+        opacity: animate ? 1 : 0,
+        transition: 'opacity 0.4s cubic-bezier(0.22, 1, 0.36, 1)',
+      }}
     >
-      {/* Blurred backdrop with purple-to-black gradient */}
+      {/* Panel */}
       <div
-        className="absolute inset-0"
         style={{
-          backdropFilter: 'blur(20px) saturate(1.2)',
-          WebkitBackdropFilter: 'blur(20px) saturate(1.2)',
-          background: 'linear-gradient(135deg, rgba(104, 73, 252, 0.15) 0%, rgba(0, 0, 0, 0.80) 50%, rgba(0, 0, 0, 0.85) 100%)',
+          position: 'relative',
+          width: '100%',
+          maxWidth: 440,
+          margin: '0 24px',
+          padding: '44px 40px 36px',
+          borderRadius: 20,
+          border: '1px solid rgba(255, 255, 255, 0.12)',
+          background: 'linear-gradient(165deg, rgba(30,30,30,0.92) 0%, rgba(20,20,20,0.95) 50%, rgba(12,12,12,0.97) 100%)',
+          backdropFilter: 'blur(48px) saturate(1.3)',
+          WebkitBackdropFilter: 'blur(48px) saturate(1.3)',
+          boxShadow: '0 0 0 1px rgba(255,255,255,0.04) inset, 0 1px 0 rgba(255,255,255,0.06) inset, 0 -1px 0 rgba(0,0,0,0.2) inset, 0 32px 80px rgba(0,0,0,0.55), 0 8px 32px rgba(0,0,0,0.3)',
+          opacity: animate ? 1 : 0,
+          transform: animate ? 'translateY(0) scale(1)' : 'translateY(40px) scale(0.96)',
+          transition: 'opacity 0.5s cubic-bezier(0.16, 1, 0.3, 1) 0.05s, transform 0.6s cubic-bezier(0.16, 1, 0.3, 1) 0.05s',
         }}
-      />
-
-      {/* Modal panel */}
-      <div
-        ref={panelRef}
-        className="relative w-full max-w-[480px] mx-6"
-        style={{ opacity: 0 }}
       >
-        <div
+        {/* Close */}
+        <button
+          onClick={onClose}
+          aria-label="Close"
           style={{
-            background: 'linear-gradient(145deg, rgba(255,255,255,0.07) 0%, rgba(255,255,255,0.02) 100%)',
-            border: '1px solid rgba(255,255,255,0.1)',
-            borderRadius: 20,
-            padding: '3rem 2.5rem',
-            backdropFilter: 'blur(40px)',
-            WebkitBackdropFilter: 'blur(40px)',
-            boxShadow: '0 25px 60px rgba(0,0,0,0.5), 0 0 0 1px rgba(255,255,255,0.05) inset',
+            position: 'absolute',
+            top: 18,
+            right: 18,
+            width: 30,
+            height: 30,
+            display: 'flex',
+            alignItems: 'center',
+            justifyContent: 'center',
+            background: 'none',
+            border: '1px solid rgba(255,255,255,0.07)',
+            borderRadius: 8,
+            color: 'rgba(255,255,255,0.35)',
+            cursor: 'auto',
+            opacity: animate ? 1 : 0,
+            transform: animate ? 'rotate(0deg)' : 'rotate(-90deg)',
+            transition: 'opacity 0.4s ease 0.2s, transform 0.4s cubic-bezier(0.22, 1, 0.36, 1) 0.2s, border-color 0.25s ease, color 0.25s ease',
+          }}
+          onMouseEnter={e => {
+            e.currentTarget.style.borderColor = 'rgba(255,255,255,0.25)';
+            e.currentTarget.style.color = 'rgba(255,255,255,0.85)';
+          }}
+          onMouseLeave={e => {
+            e.currentTarget.style.borderColor = 'rgba(255,255,255,0.07)';
+            e.currentTarget.style.color = 'rgba(255,255,255,0.35)';
           }}
         >
-          {/* Close button */}
-          <button
-            onClick={onClose}
-            className="absolute top-6 right-6"
-            style={{ background: 'none', border: 'none', color: 'rgba(255,255,255,0.4)', cursor: 'none', fontSize: '1.25rem', lineHeight: 1 }}
-          >
-            ✕
-          </button>
+          <svg width="12" height="12" viewBox="0 0 12 12" fill="none" stroke="currentColor" strokeWidth="1.5" strokeLinecap="round">
+            <path d="M1 1l10 10M11 1L1 11" />
+          </svg>
+        </button>
 
-          <h2
-            className="font-[Rubik] font-bold text-white"
-            style={{ fontSize: '1.75rem', letterSpacing: '-0.02em', marginBottom: '0.5rem' }}
-          >
-            Let&apos;s talk
-          </h2>
-          <p
-            className="font-[Inter]"
-            style={{ fontSize: '0.85rem', color: 'rgba(255,255,255,0.4)', marginBottom: '2rem', lineHeight: 1.6 }}
-          >
-            Got an idea or a project? Drop a message and I&apos;ll get back to you.
-          </p>
+        {/* Header */}
+        <h2
+          style={{
+            fontFamily: "'Rubik', sans-serif",
+            fontWeight: 700,
+            fontSize: 'clamp(1.5rem, 3vw, 1.9rem)',
+            color: 'rgba(255,255,255,0.92)',
+            letterSpacing: '-0.02em',
+            lineHeight: 1.1,
+            marginBottom: 6,
+            opacity: animate ? 1 : 0,
+            transform: animate ? 'translateY(0)' : 'translateY(16px)',
+            transition: 'opacity 0.45s ease 0.15s, transform 0.45s cubic-bezier(0.22, 1, 0.36, 1) 0.15s',
+          }}
+        >
+          Let&apos;s talk
+        </h2>
 
-          {sent ? (
-            <div className="text-center" style={{ padding: '2rem 0' }}>
-              <div style={{ fontSize: '2.5rem', marginBottom: '1rem' }}>✓</div>
-              <p className="font-[Inter] text-white" style={{ fontSize: '1rem', fontWeight: 500 }}>
-                Message sent!
-              </p>
-              <p className="font-[Inter]" style={{ fontSize: '0.8rem', color: 'rgba(255,255,255,0.4)', marginTop: '0.5rem' }}>
-                I&apos;ll get back to you soon.
-              </p>
+        <p
+          style={{
+            fontFamily: "'Inter', sans-serif",
+            fontWeight: 300,
+            fontSize: '0.8rem',
+            color: 'rgba(255,255,255,0.3)',
+            letterSpacing: '0.03em',
+            lineHeight: 1.6,
+            marginBottom: 6,
+            opacity: animate ? 1 : 0,
+            transform: animate ? 'translateY(0)' : 'translateY(12px)',
+            transition: 'opacity 0.4s ease 0.22s, transform 0.4s cubic-bezier(0.22, 1, 0.36, 1) 0.22s',
+          }}
+        >
+          Have a project in mind? Tell me about it.
+        </p>
+
+        {/* Accent line */}
+        <div
+          style={{
+            width: 36,
+            height: 1,
+            background: 'rgba(255,255,255,0.18)',
+            marginBottom: 30,
+            transformOrigin: 'left center',
+            transform: animate ? 'scaleX(1)' : 'scaleX(0)',
+            transition: 'transform 0.5s cubic-bezier(0.22, 1, 0.36, 1) 0.28s',
+          }}
+        />
+
+        {sent ? (
+          <div style={{ textAlign: 'center', padding: '32px 0' }}>
+            <div style={{
+              width: 48, height: 48, borderRadius: '50%',
+              border: '1.5px solid rgba(255,255,255,0.15)',
+              display: 'flex', alignItems: 'center', justifyContent: 'center',
+              margin: '0 auto 16px',
+            }}>
+              <svg width="20" height="20" viewBox="0 0 20 20" fill="none" stroke="rgba(255,255,255,0.8)" strokeWidth="1.5" strokeLinecap="round" strokeLinejoin="round">
+                <path d="M4 10.5l4 4 8-9" />
+              </svg>
             </div>
-          ) : (
-            <form onSubmit={handleSubmit} style={{ display: 'flex', flexDirection: 'column', gap: '1.25rem' }}>
-              <div>
-                <label
-                  className="font-[Inter]"
-                  style={{ display: 'block', fontSize: '0.7rem', color: 'rgba(255,255,255,0.35)', textTransform: 'uppercase', letterSpacing: '0.12em', marginBottom: '0.5rem' }}
-                >
-                  Email
-                </label>
-                <input
-                  ref={emailRef}
-                  type="email"
-                  required
-                  value={email}
-                  onChange={(e) => setEmail(e.target.value)}
-                  placeholder="you@company.com"
+            <p style={{ fontFamily: "'Rubik', sans-serif", fontWeight: 600, fontSize: '1rem', color: 'rgba(255,255,255,0.85)' }}>
+              Opening mail client...
+            </p>
+            <p style={{ fontFamily: "'Inter', sans-serif", fontWeight: 300, fontSize: '0.78rem', color: 'rgba(255,255,255,0.3)', marginTop: 6 }}>
+              I&apos;ll get back to you soon.
+            </p>
+          </div>
+        ) : (
+          <form onSubmit={handleSubmit}>
+            <div style={{ display: 'flex', flexDirection: 'column', gap: 24 }}>
+              {(['name', 'email', 'message'] as const).map((field, i) => (
+                <div
+                  key={field}
                   style={{
-                    width: '100%',
-                    padding: '0.85rem 1.25rem',
-                    borderRadius: 12,
-                    border: '1px solid rgba(255,255,255,0.1)',
-                    background: 'rgba(255,255,255,0.04)',
-                    color: 'white',
-                    fontSize: '0.9rem',
-                    fontFamily: 'Inter, sans-serif',
-                    outline: 'none',
-                    transition: 'border-color 0.2s',
-                    cursor: 'none',
+                    position: 'relative',
+                    opacity: animate ? 1 : 0,
+                    transform: animate ? 'translateY(0)' : 'translateY(16px)',
+                    transition: `opacity 0.4s ease ${0.32 + i * 0.07}s, transform 0.4s cubic-bezier(0.22, 1, 0.36, 1) ${0.32 + i * 0.07}s`,
                   }}
-                  onFocus={(e) => (e.target.style.borderColor = 'rgba(104, 73, 252, 0.5)')}
-                  onBlur={(e) => (e.target.style.borderColor = 'rgba(255,255,255,0.1)')}
-                />
-              </div>
-
-              <div>
-                <label
-                  className="font-[Inter]"
-                  style={{ display: 'block', fontSize: '0.7rem', color: 'rgba(255,255,255,0.35)', textTransform: 'uppercase', letterSpacing: '0.12em', marginBottom: '0.5rem' }}
                 >
-                  Message
-                </label>
-                <textarea
-                  required
-                  value={message}
-                  onChange={(e) => setMessage(e.target.value)}
-                  placeholder="Tell me about your project..."
-                  rows={4}
-                  style={{
-                    width: '100%',
-                    padding: '0.85rem 1.25rem',
-                    borderRadius: 12,
-                    border: '1px solid rgba(255,255,255,0.1)',
-                    background: 'rgba(255,255,255,0.04)',
-                    color: 'white',
-                    fontSize: '0.9rem',
-                    fontFamily: 'Inter, sans-serif',
-                    outline: 'none',
-                    resize: 'vertical',
-                    transition: 'border-color 0.2s',
-                    cursor: 'none',
-                  }}
-                  onFocus={(e) => (e.target.style.borderColor = 'rgba(104, 73, 252, 0.5)')}
-                  onBlur={(e) => (e.target.style.borderColor = 'rgba(255,255,255,0.1)')}
-                />
-              </div>
+                  <label
+                    style={{
+                      position: 'absolute',
+                      left: 0,
+                      top: isUp(field) ? -10 : 10,
+                      fontFamily: "'Inter', sans-serif",
+                      fontWeight: 400,
+                      fontSize: isUp(field) ? '0.62rem' : '0.8rem',
+                      color: isUp(field) ? 'rgba(255,255,255,0.4)' : 'rgba(255,255,255,0.2)',
+                      letterSpacing: '0.1em',
+                      textTransform: 'uppercase',
+                      pointerEvents: 'none',
+                      transition: 'all 0.25s cubic-bezier(0.22, 1, 0.36, 1)',
+                    }}
+                  >
+                    {field === 'name' ? 'Your name' : field === 'email' ? 'Email address' : 'Your message'}
+                  </label>
 
-              <button
-                type="submit"
-                disabled={sending}
-                style={{
-                  marginTop: '0.5rem',
-                  padding: '1rem 2rem',
-                  borderRadius: 14,
-                  border: 'none',
-                  background: 'linear-gradient(135deg, #6849FC 0%, #4a2fd4 100%)',
-                  color: 'white',
-                  fontSize: '0.95rem',
-                  fontFamily: 'Inter, sans-serif',
-                  fontWeight: 600,
-                  letterSpacing: '0.06em',
-                  textTransform: 'uppercase',
-                  cursor: 'none',
-                  transition: 'all 0.3s ease',
-                  opacity: sending ? 0.6 : 1,
-                  boxShadow: '0 4px 20px rgba(104, 73, 252, 0.3)',
-                }}
-              >
-                {sending ? 'Sending...' : 'Send Message'}
-              </button>
-            </form>
-          )}
-        </div>
+                  {field === 'message' ? (
+                    <textarea
+                      value={formData[field]}
+                      onChange={e => handleChange(field, e.target.value)}
+                      onFocus={() => setFocused(field)}
+                      onBlur={() => setFocused(null)}
+                      rows={3}
+                      required
+                      style={{
+                        width: '100%',
+                        background: 'none',
+                        border: 'none',
+                        borderBottom: `1px solid ${focused === field ? 'rgba(255,255,255,0.28)' : 'rgba(255,255,255,0.07)'}`,
+                        outline: 'none',
+                        color: 'rgba(255,255,255,0.85)',
+                        fontFamily: "'Inter', sans-serif",
+                        fontWeight: 300,
+                        fontSize: '0.88rem',
+                        padding: '10px 0 8px',
+                        resize: 'none',
+                        letterSpacing: '0.015em',
+                        lineHeight: 1.65,
+                        transition: 'border-color 0.3s ease',
+                        cursor: 'auto',
+                      }}
+                    />
+                  ) : (
+                    <input
+                      type={field === 'email' ? 'email' : 'text'}
+                      value={formData[field]}
+                      onChange={e => handleChange(field, e.target.value)}
+                      onFocus={() => setFocused(field)}
+                      onBlur={() => setFocused(null)}
+                      required
+                      style={{
+                        width: '100%',
+                        background: 'none',
+                        border: 'none',
+                        borderBottom: `1px solid ${focused === field ? 'rgba(255,255,255,0.28)' : 'rgba(255,255,255,0.07)'}`,
+                        outline: 'none',
+                        color: 'rgba(255,255,255,0.85)',
+                        fontFamily: "'Inter', sans-serif",
+                        fontWeight: 300,
+                        fontSize: '0.88rem',
+                        padding: '10px 0 8px',
+                        letterSpacing: '0.015em',
+                        transition: 'border-color 0.3s ease',
+                        cursor: 'auto',
+                      }}
+                    />
+                  )}
+                </div>
+              ))}
+            </div>
+
+            <button
+              type="submit"
+              className="glass-btn"
+              style={{
+                marginTop: 32,
+                width: '100%',
+                justifyContent: 'center',
+                padding: '0.95rem 2rem',
+                fontSize: '0.8rem',
+                letterSpacing: '0.14em',
+                opacity: animate ? 1 : 0,
+                transform: animate ? 'translateY(0)' : 'translateY(12px)',
+                transition: 'opacity 0.4s ease 0.55s, transform 0.4s cubic-bezier(0.22, 1, 0.36, 1) 0.55s, background 0.35s ease, border-color 0.35s ease, color 0.35s ease, box-shadow 0.35s ease',
+              }}
+            >
+              Send message
+              <svg width="15" height="15" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="1.5" strokeLinecap="round" strokeLinejoin="round">
+                <path d="M5 12h14" />
+                <path d="m12 5 7 7-7 7" />
+              </svg>
+            </button>
+          </form>
+        )}
       </div>
     </div>
   );

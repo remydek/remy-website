@@ -5,6 +5,7 @@ import dynamic from 'next/dynamic';
 import gsap from 'gsap';
 import Noise from '@/components/Noise';
 import CurvedLoop from '@/components/CurvedLoop';
+import LetterGlitch from '@/components/LetterGlitch';
 import ContactModal from '@/components/ContactModal';
 
 const CursorModel = dynamic(() => import('@/components/CursorModel'), { ssr: false });
@@ -18,7 +19,6 @@ export default function Home() {
   const bottomRef = useRef<HTMLDivElement>(null);
   const curvedRef = useRef<HTMLDivElement>(null);
   const glowRef = useRef<HTMLDivElement>(null);
-  const cursorDotRef = useRef<HTMLDivElement>(null);
   const [modalOpen, setModalOpen] = useState(false);
 
   useEffect(() => {
@@ -43,10 +43,6 @@ export default function Home() {
         glowRef.current.style.left = e.clientX + 'px';
         glowRef.current.style.top = e.clientY + 'px';
       }
-      if (cursorDotRef.current) {
-        cursorDotRef.current.style.left = e.clientX + 'px';
-        cursorDotRef.current.style.top = e.clientY + 'px';
-      }
     };
 
     if (window.matchMedia('(hover: hover)').matches) {
@@ -68,6 +64,17 @@ export default function Home() {
         className="absolute inset-0 w-full h-full object-cover object-[center_15%] brightness-[0.85]"
         style={{ animation: 'photoIn 1.8s cubic-bezier(0.16, 1, 0.3, 1) forwards', transform: 'scale(1.08)' }}
       />
+
+      {/* LetterGlitch overlay on top of photo */}
+      <div className="absolute inset-0 z-[0]" style={{ mixBlendMode: 'overlay', opacity: 0.45 }}>
+        <LetterGlitch
+          glitchColors={['#2b4539', '#61dca3', '#61b3dc']}
+          glitchSpeed={50}
+          centerVignette={true}
+          outerVignette={true}
+          smooth={true}
+        />
+      </div>
 
       {/* Gradient Overlays */}
       <div
@@ -94,6 +101,32 @@ export default function Home() {
 
       {/* Main Content - padded */}
       <div className="absolute inset-0 z-[3] flex flex-col justify-center" style={{ padding: '6vh 8vw' }}>
+        {/* Claude Code Expert Badge - above name */}
+        <div style={{ marginBottom: '1.2rem' }}>
+          <span
+            style={{
+              display: 'inline-flex',
+              alignItems: 'center',
+              gap: '0.5rem',
+              fontFamily: "'Inter', sans-serif",
+              fontWeight: 500,
+              fontSize: '0.7rem',
+              letterSpacing: '0.08em',
+              color: '#D97706',
+              padding: '0.45rem 1rem 0.45rem 0.65rem',
+              borderRadius: 10,
+              border: '1px solid rgba(217, 119, 6, 0.25)',
+              background: 'linear-gradient(135deg, rgba(217, 119, 6, 0.1) 0%, rgba(217, 119, 6, 0.03) 100%)',
+              backdropFilter: 'blur(12px)',
+              WebkitBackdropFilter: 'blur(12px)',
+              boxShadow: '0 0 20px rgba(217, 119, 6, 0.08), 0 0 0 1px rgba(217, 119, 6, 0.06) inset',
+            }}
+          >
+            <img src="/claude-color.svg" alt="Claude" width={16} height={16} />
+            Claude Code Expert
+          </span>
+        </div>
+
         <h1
           ref={nameRef}
           className="font-[Rubik] font-bold text-white leading-[1.05] tracking-[-0.02em]"
@@ -123,66 +156,55 @@ export default function Home() {
         >
           Building immersive experiences for the world&apos;s most ambitious brands. Co-Founder of Augmento.
         </p>
-      </div>
 
-      {/* Glass Buttons — top-right, horizontal row, inside border */}
-      <div
-        ref={buttonsRef}
-        className="absolute z-[3] flex flex-row items-center"
-        style={{ right: 'calc(4% + 2rem)', top: 'calc(4% + 1.5rem)', gap: '1rem' }}
-      >
-        {[
-          { href: 'https://augmento.com', icon: 'hgi-globe-02', label: 'Augmento.com', hoverColor: '#6849FC' },
-          { href: 'https://linkedin.com/in/remydeklein', icon: 'hgi-linkedin-02', label: 'LinkedIn', hoverColor: '#0A66C2' },
-          { href: '#', icon: 'hgi-mail-02', label: "Let's talk", arrow: true, hoverColor: '#ffffff', isModal: true },
-        ].map((btn) =>
-          btn.isModal ? (
-            <button
-              key={btn.label}
-              onClick={() => setModalOpen(true)}
-              className="glass-btn"
-              style={{ '--hover-color': btn.hoverColor } as React.CSSProperties}
-            >
-              <i className={`hgi hgi-bulk-rounded ${btn.icon}`} style={{ fontSize: '1.1rem' }} />
-              {btn.label}
-              <svg style={{ width: 16, height: 16, marginLeft: 4 }} viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round">
-                <path d="M5 12h14" />
-                <path d="m12 5 7 7-7 7" />
-              </svg>
-            </button>
-          ) : (
+        {/* Glass Buttons */}
+        <div ref={buttonsRef} style={{ display: 'flex', flexWrap: 'wrap', gap: '1rem', marginTop: '1.5rem' }}>
+          {[
+            { href: 'https://augmento.com', icon: 'hgi-globe-02', label: 'Augmento.com' },
+            { href: 'https://linkedin.com/in/remydeklein', icon: 'hgi-linkedin-02', label: 'LinkedIn' },
+          ].map((btn) => (
             <a
               key={btn.label}
               href={btn.href}
               target="_blank"
               rel="noopener noreferrer"
               className="glass-btn"
-              style={{ '--hover-color': btn.hoverColor } as React.CSSProperties}
             >
               <i className={`hgi hgi-bulk-rounded ${btn.icon}`} style={{ fontSize: '1.1rem' }} />
               {btn.label}
             </a>
-          )
-        )}
+          ))}
+          <button
+            onClick={() => setModalOpen(true)}
+            className="glass-btn"
+          >
+            <i className="hgi hgi-bulk-rounded hgi-mail-02" style={{ fontSize: '1.1rem' }} />
+            Let&apos;s talk
+            <svg style={{ width: 16, height: 16, marginLeft: 4 }} viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round">
+              <path d="M5 12h14" />
+              <path d="m12 5 7 7-7 7" />
+            </svg>
+          </button>
+        </div>
       </div>
 
       {/* Curved Loop Text - seamless edge to edge, no padding */}
-      <div ref={curvedRef} className="absolute bottom-[80px] left-0 right-0 z-[3]">
+      <div ref={curvedRef} className="absolute bottom-[80px] left-0 right-0 z-[3] pointer-events-none">
         <CurvedLoop
-          marqueeText="FOUNDER ✦ BUILDER ✦ CLOSER ✦ AUGMENTO ✦ DUBAI ✦ IMMERSIVE ✦ EXPERIENCES ✦"
+          marqueeText="FOUNDER ✦ BUILDER ✦ CREATIVE ✦ AUGMENTO ✦ DUBAI ✦ IMMERSIVE 3D/AR EXPERIENCES ✦"
           speed={1.5}
-          curveAmount={200}
+          curveAmount={300}
           direction="left"
           interactive
           className="text-white/10"
         />
       </div>
 
-      {/* Bottom Bar - inside border */}
+      {/* Bottom Bar - padded */}
       <div
         ref={bottomRef}
-        className="absolute z-[4] flex justify-end items-center"
-        style={{ bottom: 'calc(4% + 1.5rem)', right: 'calc(4% + 2rem)' }}
+        className="absolute bottom-0 left-0 right-0 z-[4] flex justify-end items-center"
+        style={{ padding: '2rem 8vw' }}
       >
         <div className="font-[Inter] font-light text-[0.75rem] text-white/30 tracking-[0.15em] uppercase flex items-center gap-2">
           <span className="w-[5px] h-[5px] rounded-full bg-green-400" style={{ animation: 'pulse 2.5s ease-in-out infinite' }} />
@@ -190,8 +212,11 @@ export default function Home() {
         </div>
       </div>
 
-      {/* 3D Cursor Model — hidden when modal open */}
-      {!modalOpen && <CursorModel />}
+      {/* Contact Modal */}
+      <ContactModal isOpen={modalOpen} onClose={() => setModalOpen(false)} />
+
+      {/* 3D Cursor Model */}
+      <CursorModel />
 
       {/* Cursor Glow */}
       <div
@@ -202,30 +227,6 @@ export default function Home() {
           transition: 'left 0.5s ease-out, top 0.5s ease-out',
         }}
       />
-
-      {/* Custom Cursor Dot — always visible */}
-      <div
-        ref={cursorDotRef}
-        className="fixed pointer-events-none z-[100] -translate-x-1/2 -translate-y-1/2"
-        style={{
-          width: 10,
-          height: 10,
-          borderRadius: '50%',
-          backgroundColor: '#fff',
-          boxShadow: '0 0 6px rgba(255,255,255,0.4)',
-          left: '-100px',
-          top: '-100px',
-        }}
-      />
-
-      {/* Animated Gradient Border */}
-      <div
-        className="fixed z-[50] pointer-events-none animated-border"
-        style={{ inset: '4%' }}
-      />
-
-      {/* Contact Modal */}
-      <ContactModal open={modalOpen} onClose={() => setModalOpen(false)} />
     </div>
   );
 }
