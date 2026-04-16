@@ -7,6 +7,7 @@ import Noise from '@/components/Noise';
 import CurvedLoop from '@/components/CurvedLoop';
 import LetterGlitch from '@/components/LetterGlitch';
 import ContactModal from '@/components/ContactModal';
+import ProjectCards from '@/components/ProjectCards';
 
 const CursorModel = dynamic(() => import('@/components/CursorModel'), { ssr: false });
 
@@ -187,6 +188,9 @@ export default function Home() {
           </button>
         </div>
       </div>
+
+      {/* My Creations - right side */}
+      <ProjectCards />
 
       {/* Curved Loop Text - seamless edge to edge, no padding */}
       <div ref={curvedRef} className="absolute bottom-[80px] left-0 right-0 z-[3] pointer-events-none">
