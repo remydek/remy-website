@@ -2,7 +2,6 @@
 
 import { useEffect, useRef, useState } from 'react';
 import dynamic from 'next/dynamic';
-import gsap from 'gsap';
 import Noise from '@/components/Noise';
 import CurvedLoop from '@/components/CurvedLoop';
 import LetterGlitch from '@/components/LetterGlitch';
@@ -12,33 +11,10 @@ import ProjectCards from '@/components/ProjectCards';
 const CursorModel = dynamic(() => import('@/components/CursorModel'), { ssr: false });
 
 export default function Home() {
-  const nameRef = useRef<HTMLHeadingElement>(null);
-  const taglineRef = useRef<HTMLParagraphElement>(null);
-  const dividerRef = useRef<HTMLDivElement>(null);
-  const subRef = useRef<HTMLParagraphElement>(null);
-  const buttonsRef = useRef<HTMLDivElement>(null);
-  const bottomRef = useRef<HTMLDivElement>(null);
-  const curvedRef = useRef<HTMLDivElement>(null);
   const glowRef = useRef<HTMLDivElement>(null);
   const [modalOpen, setModalOpen] = useState(false);
 
   useEffect(() => {
-    const els = [nameRef, taglineRef, dividerRef, subRef, buttonsRef, bottomRef, curvedRef];
-    els.forEach((ref) => {
-      if (ref.current) gsap.set(ref.current, { opacity: 0, y: 30 });
-    });
-    if (dividerRef.current) gsap.set(dividerRef.current, { opacity: 0, width: 0, y: 0 });
-
-    const tl = gsap.timeline({ defaults: { ease: 'power3.out' }, delay: 0.3 });
-
-    tl.to(nameRef.current, { opacity: 1, y: 0, duration: 1 })
-      .to(taglineRef.current, { opacity: 1, y: 0, duration: 0.8 }, '-=0.5')
-      .to(dividerRef.current, { opacity: 1, width: 48, duration: 0.6 }, '-=0.4')
-      .to(subRef.current, { opacity: 1, y: 0, duration: 0.8 }, '-=0.3')
-      .to(buttonsRef.current, { opacity: 1, y: 0, duration: 0.8 }, '-=0.3')
-      .to(bottomRef.current, { opacity: 1, y: 0, duration: 0.8 }, '-=0.3')
-      .to(curvedRef.current, { opacity: 1, y: 0, duration: 1 }, '-=0.5');
-
     const handleMouseMove = (e: MouseEvent) => {
       if (glowRef.current) {
         glowRef.current.style.left = e.clientX + 'px';
@@ -52,7 +28,6 @@ export default function Home() {
 
     return () => {
       document.removeEventListener('mousemove', handleMouseMove);
-      tl.kill();
     };
   }, []);
 
@@ -66,11 +41,11 @@ export default function Home() {
         style={{ animation: 'photoIn 1.8s cubic-bezier(0.16, 1, 0.3, 1) forwards', transform: 'scale(1.08)' }}
       />
 
-      {/* LetterGlitch overlay on top of photo */}
-      <div className="absolute inset-0 z-[0]" style={{ mixBlendMode: 'overlay', opacity: 0.45 }}>
+      {/* LetterGlitch overlay — subtle texture only */}
+      <div className="absolute inset-0 z-[0]" style={{ mixBlendMode: 'overlay', opacity: 0.22 }}>
         <LetterGlitch
           glitchColors={['#2b4539', '#61dca3', '#61b3dc']}
-          glitchSpeed={50}
+          glitchSpeed={80}
           centerVignette={true}
           outerVignette={true}
           smooth={true}
@@ -100,10 +75,17 @@ export default function Home() {
         patternAlpha={25}
       />
 
-      {/* Main Content - padded */}
-      <div className="absolute inset-0 z-[3] flex flex-col justify-center" style={{ padding: '6vh 8vw' }}>
-        {/* Claude Code Expert Badge - above name */}
-        <div style={{ marginBottom: '1.2rem' }}>
+      {/* Main Content — left hero column */}
+      <div
+        className="absolute inset-y-0 left-0 z-[7] flex flex-col justify-center pointer-events-none"
+        style={{
+          padding: 'clamp(2rem, 6vh, 4rem) clamp(2rem, 5vw, 4.5rem)',
+          width: 'min(54vw, 640px)',
+          gap: 0,
+        }}
+      >
+        {/* Claude Code Expert Badge */}
+        <div style={{ marginBottom: '1.75rem' }}>
           <span
             style={{
               display: 'inline-flex',
@@ -111,77 +93,96 @@ export default function Home() {
               gap: '0.5rem',
               fontFamily: "'Inter', sans-serif",
               fontWeight: 500,
-              fontSize: '0.7rem',
-              letterSpacing: '0.08em',
-              color: '#D97706',
-              padding: '0.45rem 1rem 0.45rem 0.65rem',
-              borderRadius: 10,
-              border: '1px solid rgba(217, 119, 6, 0.25)',
-              background: 'linear-gradient(135deg, rgba(217, 119, 6, 0.1) 0%, rgba(217, 119, 6, 0.03) 100%)',
+              fontSize: '0.72rem',
+              letterSpacing: '0.06em',
+              color: '#E08B3B',
+              padding: '0.45rem 0.95rem 0.45rem 0.65rem',
+              borderRadius: 999,
+              border: '1px solid rgba(224, 139, 59, 0.28)',
+              background: 'linear-gradient(135deg, rgba(224, 139, 59, 0.12) 0%, rgba(224, 139, 59, 0.04) 100%)',
               backdropFilter: 'blur(12px)',
               WebkitBackdropFilter: 'blur(12px)',
-              boxShadow: '0 0 20px rgba(217, 119, 6, 0.08), 0 0 0 1px rgba(217, 119, 6, 0.06) inset',
+              boxShadow: '0 0 24px rgba(224, 139, 59, 0.1), 0 0 0 1px rgba(224, 139, 59, 0.08) inset',
             }}
           >
-            <img src="/claude-color.svg" alt="Claude" width={16} height={16} />
+            <img src="/claude-color.svg" alt="" width={16} height={16} />
             Claude Code Expert
           </span>
         </div>
 
         <h1
-          ref={nameRef}
-          className="font-[Rubik] font-bold text-white leading-[1.05] tracking-[-0.02em]"
-          style={{ fontSize: 'clamp(3rem, 7vw, 6.5rem)' }}
+          className="font-[Rubik] text-white"
+          style={{
+            fontSize: 'clamp(3.25rem, 6.5vw, 5.5rem)',
+            lineHeight: 0.94,
+            letterSpacing: '-0.04em',
+            fontWeight: 700,
+            fontVariationSettings: '"wdth" 92, "opsz" 96',
+            marginBottom: '1.5rem',
+          }}
         >
           REMY<br />DE KLEIN
         </h1>
 
         <p
-          ref={taglineRef}
-          className="font-[Inter] font-light tracking-[0.12em] uppercase"
-          style={{ fontSize: 'clamp(0.85rem, 1.4vw, 1.15rem)', marginTop: '1.5rem', color: 'rgba(255,255,255,0.55)' }}
+          className="font-[Inter]"
+          style={{
+            fontSize: '0.78rem',
+            fontWeight: 400,
+            letterSpacing: '0.24em',
+            textTransform: 'uppercase',
+            color: 'oklch(85% 0.015 55 / 0.75)',
+            marginBottom: '2rem',
+          }}
         >
-          Founder / Builder / Creative Director
+          Founder · Builder · Creative Director
         </p>
 
         <div
-          ref={dividerRef}
-          className="bg-white/25"
-          style={{ height: '1px', marginTop: '2rem' }}
+          style={{
+            height: '1px',
+            width: 56,
+            background: 'oklch(78% 0.015 55 / 0.35)',
+            marginBottom: '1.5rem',
+          }}
         />
 
         <p
-          ref={subRef}
-          className="font-[Inter] font-normal"
-          style={{ fontSize: 'clamp(0.8rem, 1.1vw, 1rem)', marginTop: '1.5rem', lineHeight: 1.8, maxWidth: '400px', color: 'rgba(255,255,255,0.45)' }}
+          className="font-[Inter]"
+          style={{
+            fontSize: '0.98rem',
+            lineHeight: 1.6,
+            maxWidth: '42ch',
+            color: 'oklch(90% 0.012 60 / 0.78)',
+            fontWeight: 400,
+            marginBottom: '2.5rem',
+          }}
         >
-          Building immersive experiences for the world&apos;s most ambitious brands. Co-Founder of Augmento.
+          Building immersive experiences for the world&apos;s most ambitious brands.
+          Co-Founder of Augmento.
         </p>
 
-        {/* Glass Buttons */}
-        <div ref={buttonsRef} style={{ display: 'flex', flexWrap: 'wrap', gap: '1rem', marginTop: '1.5rem' }}>
-          {[
-            { href: 'https://augmento.com', icon: 'hgi-globe-02', label: 'Augmento.com' },
-            { href: 'https://linkedin.com/in/remydeklein', icon: 'hgi-linkedin-02', label: 'LinkedIn' },
-          ].map((btn) => (
-            <a
-              key={btn.label}
-              href={btn.href}
-              target="_blank"
-              rel="noopener noreferrer"
-              className="glass-btn"
-            >
-              <i className={`hgi hgi-bulk-rounded ${btn.icon}`} style={{ fontSize: '1.1rem' }} />
-              {btn.label}
-            </a>
-          ))}
-          <button
-            onClick={() => setModalOpen(true)}
+        {/* Buttons */}
+        <div
+          className="pointer-events-auto"
+          style={{ display: 'flex', flexWrap: 'wrap', gap: '0.75rem' }}
+        >
+          <a
+            href="https://linkedin.com/in/remydeklein"
+            target="_blank"
+            rel="noopener noreferrer"
             className="glass-btn"
           >
-            <i className="hgi hgi-bulk-rounded hgi-mail-02" style={{ fontSize: '1.1rem' }} />
+            <i className="hgi hgi-bulk-rounded hgi-linkedin-02" style={{ fontSize: '1.05rem' }} />
+            LinkedIn
+          </a>
+          <button
+            onClick={() => setModalOpen(true)}
+            className="glass-btn glass-btn-primary"
+          >
+            <i className="hgi hgi-bulk-rounded hgi-mail-02" style={{ fontSize: '1.05rem' }} />
             Let&apos;s talk
-            <svg style={{ width: 16, height: 16, marginLeft: 4 }} viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round">
+            <svg style={{ width: 15, height: 15, marginLeft: 2 }} viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round">
               <path d="M5 12h14" />
               <path d="m12 5 7 7-7 7" />
             </svg>
@@ -192,21 +193,20 @@ export default function Home() {
       {/* My Creations - right side */}
       <ProjectCards />
 
-      {/* Curved Loop Text - seamless edge to edge, no padding */}
-      <div ref={curvedRef} className="absolute bottom-[80px] left-0 right-0 z-[3] pointer-events-none">
+      {/* Curved Loop Text — subtle ribbon anchoring the bottom */}
+      <div className="absolute bottom-[-8px] left-0 right-0 z-[2] pointer-events-none">
         <CurvedLoop
           marqueeText="FOUNDER ✦ BUILDER ✦ CREATIVE ✦ AUGMENTO ✦ DUBAI ✦ IMMERSIVE 3D/AR EXPERIENCES ✦"
-          speed={1.5}
-          curveAmount={300}
+          speed={0.5}
+          curveAmount={60}
           direction="left"
-          interactive
-          className="text-white/10"
+          fontSize="1.25rem"
+          className="text-white/[0.1]"
         />
       </div>
 
       {/* Bottom Bar - padded */}
       <div
-        ref={bottomRef}
         className="absolute bottom-0 left-0 right-0 z-[4] flex justify-end items-center"
         style={{ padding: '2rem 8vw' }}
       >

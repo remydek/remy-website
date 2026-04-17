@@ -109,7 +109,7 @@ export default function CursorModel() {
         top: 0,
         width: CURSOR_SIZE,
         height: CURSOR_SIZE,
-        zIndex: 5,
+        zIndex: 20,
         pointerEvents: 'none',
         willChange: 'transform',
       }}
