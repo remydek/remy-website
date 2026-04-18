@@ -5,8 +5,7 @@
       "name": "dev",
       "runtimeExecutable": "npm",
       "runtimeArgs": ["run", "dev", "--", "-p", "3004"],
-      "port": 3004,
-      "cwd": "app"
+      "port": 3004
     }
   ]
 }
