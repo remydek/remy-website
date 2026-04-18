@@ -24,11 +24,18 @@ html, body {
   -webkit-font-smoothing: antialiased;
   -moz-osx-font-smoothing: grayscale;
   font-optical-sizing: auto;
-  cursor: none;
 }
 
-a, button, [role="button"] {
-  cursor: none;
+/* Custom cursor only on hover-capable devices (desktop with mouse) */
+@media (hover: hover) and (pointer: fine) {
+  html, body { cursor: none; }
+  a, button, [role="button"] { cursor: none; }
+}
+
+/* Touch / coarse pointer (mobile, tablet) — restore native cursor */
+@media (hover: none), (pointer: coarse) {
+  html, body { cursor: auto; }
+  a, button, [role="button"] { cursor: pointer; }
 }
 
 @keyframes photoIn {
@@ -139,5 +146,54 @@ a, button, [role="button"] {
   border: 3px solid transparent;
   border-image: conic-gradient(from var(--border-angle), #6849FC, #555, #6849FC, #444, #6849FC) 1;
   animation: borderRotate 6s linear infinite;
+}
+
+/* ─── Responsive layout ─────────────────────────────────────────────────── */
+
+/* Hero column — adapts to viewport, capped on desktop */
+.hero-column {
+  width: 100%;
+  max-width: 640px;
+  padding: clamp(1.25rem, 5vh, 4rem) clamp(1.25rem, 5vw, 4.5rem);
+}
+@media (min-width: 768px) {
+  .hero-column { width: min(60vw, 640px); }
+}
+@media (min-width: 1024px) {
+  .hero-column { width: min(54vw, 640px); }
+}
+
+/* Background photo positioning — keep face visible across orientations */
+.bg-photo {
+  object-position: center 25%;
+}
+@media (min-width: 768px) {
+  .bg-photo { object-position: center 15%; }
+}
+
+/* Project card stack — visible on tablet+ with responsive scale */
+.project-stack {
+  display: none;
+}
+@media (min-width: 768px) {
+  .project-stack { display: block; }
+}
+
+/* Smaller buttons on mobile */
+@media (max-width: 480px) {
+  .glass-btn {
+    padding: 0.7rem 1.4rem;
+    font-size: 0.78rem;
+  }
+}
+
+/* Hide ambient marquee on small screens — too noisy at small heights */
+@media (max-width: 480px) {
+  .marquee-ribbon { display: none; }
+}
+
+/* Bottom bar position — pull in on mobile so it doesn't crowd */
+.location-bar {
+  padding: clamp(1rem, 2.5vh, 2rem) clamp(1.25rem, 5vw, 8vw);
 }
 

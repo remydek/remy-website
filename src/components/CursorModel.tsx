@@ -3,7 +3,7 @@
 import { Canvas } from '@react-three/fiber';
 import { useGLTF, Environment, Center } from '@react-three/drei';
 import { useFrame } from '@react-three/fiber';
-import { Suspense, useEffect, useRef, useCallback } from 'react';
+import { Suspense, useEffect, useRef, useCallback, useState } from 'react';
 import * as THREE from 'three';
 
 const CURSOR_SIZE = 400;
@@ -45,6 +45,7 @@ export default function CursorModel() {
   const smoothPos = useRef({ x: -CURSOR_SIZE, y: -CURSOR_SIZE });
   const dotPos = useRef({ x: -20, y: -20 });
   const rafRef = useRef<number>(0);
+  const [enabled, setEnabled] = useState(false);
 
   const handleMouseMove = useCallback((e: MouseEvent) => {
     pos.current.x = e.clientX;
@@ -52,6 +53,10 @@ export default function CursorModel() {
   }, []);
 
   useEffect(() => {
+    // Only render the cursor stack on hover-capable, fine-pointer devices (desktops with mice).
+    // Skips on touch devices — saves a heavy 3D scene + WebGL context on mobile/tablet.
+    if (!window.matchMedia('(hover: hover) and (pointer: fine)').matches) return;
+    setEnabled(true);
     window.addEventListener('mousemove', handleMouseMove);
 
     const animate = () => {
@@ -79,6 +84,8 @@ export default function CursorModel() {
       cancelAnimationFrame(rafRef.current);
     };
   }, [handleMouseMove]);
+
+  if (!enabled) return null;
 
   return (
     <>

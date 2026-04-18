@@ -32,10 +32,17 @@ const projects = [
 
 export default function ProjectCards() {
   const [animate, setAnimate] = useState(false);
+  const [vw, setVw] = useState<number | null>(null);
 
   useEffect(() => {
+    const update = () => setVw(window.innerWidth);
+    update();
+    window.addEventListener('resize', update);
     const timeout = setTimeout(() => setAnimate(true), 800);
-    return () => clearTimeout(timeout);
+    return () => {
+      window.removeEventListener('resize', update);
+      clearTimeout(timeout);
+    };
   }, []);
 
   const handleCardClick = (idx: number) => {
@@ -43,24 +50,35 @@ export default function ProjectCards() {
     if (project) window.open(project.url, '_blank', 'noopener,noreferrer');
   };
 
+  // Fluid card dimensions: linearly scale between tablet and large desktop
+  // Mobile (<768px) is hidden via .project-stack CSS class.
+  const w = vw ?? 1440;
+  const cardWidth = Math.round(Math.max(440, Math.min(702, w * 0.46)));
+  const cardHeight = Math.round(cardWidth * 0.667);
+  const cardDistance = Math.round(cardWidth * 0.118);
+  const verticalDistance = Math.round(cardWidth * 0.137);
+  // Container needs to be larger than cards because CardSwap offsets them via translate
+  const containerWidth = Math.round(cardWidth + cardDistance * 3 + 40);
+  const containerHeight = Math.round(cardHeight + verticalDistance * 3 + 80);
+
   return (
     <div
-      className="absolute z-[6] hidden lg:block pointer-events-none"
+      className="project-stack absolute z-[6] pointer-events-none"
       style={{
         right: 0,
         bottom: 0,
-        width: '884px',
-        height: '728px',
+        width: containerWidth,
+        height: containerHeight,
         opacity: animate ? 1 : 0,
         transition: 'opacity 0.8s ease',
       }}
     >
       <div className="pointer-events-auto">
         <CardSwap
-          width={702}
-          height={468}
-          cardDistance={83}
-          verticalDistance={96}
+          width={cardWidth}
+          height={cardHeight}
+          cardDistance={cardDistance}
+          verticalDistance={verticalDistance}
           delay={5000}
           pauseOnHover={true}
           skewAmount={4}
@@ -100,7 +118,7 @@ export default function ProjectCards() {
                   top: 0,
                   left: 0,
                   right: 0,
-                  padding: '18px 24px',
+                  padding: 'clamp(12px, 1.5vw, 18px) clamp(16px, 2vw, 24px)',
                   display: 'flex',
                   alignItems: 'center',
                   justifyContent: 'space-between',
@@ -113,7 +131,7 @@ export default function ProjectCards() {
                   gap: 10,
                   fontFamily: "'Inter', sans-serif",
                   fontWeight: 400,
-                  fontSize: '0.86rem',
+                  fontSize: 'clamp(0.65rem, 1vw, 0.86rem)',
                   letterSpacing: '0.14em',
                   textTransform: 'uppercase',
                   color: 'rgba(255,255,255,0.55)',
@@ -147,13 +165,13 @@ export default function ProjectCards() {
                   bottom: 0,
                   left: 0,
                   right: 0,
-                  padding: '26px 32px',
+                  padding: 'clamp(18px, 2vw, 26px) clamp(20px, 2.5vw, 32px)',
                 }}
               >
                 <p style={{
                   fontFamily: "'Rubik', sans-serif",
                   fontWeight: 600,
-                  fontSize: '1.95rem',
+                  fontSize: 'clamp(1.35rem, 2.4vw, 1.95rem)',
                   color: 'rgba(255,255,255,0.96)',
                   letterSpacing: '-0.02em',
                   lineHeight: 1.05,
@@ -163,7 +181,7 @@ export default function ProjectCards() {
                 <p style={{
                   fontFamily: "'Inter', sans-serif",
                   fontWeight: 300,
-                  fontSize: '1rem',
+                  fontSize: 'clamp(0.78rem, 1.2vw, 1rem)',
                   color: 'rgba(255,255,255,0.5)',
                   letterSpacing: '0.04em',
                   marginTop: 8,

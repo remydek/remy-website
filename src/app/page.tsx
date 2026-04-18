@@ -36,8 +36,9 @@ export default function Home() {
       {/* Background Image */}
       <img
         src="/remy-bg-optimized.jpg"
-        alt="Background"
-        className="absolute inset-0 w-full h-full object-cover object-[center_15%] brightness-[0.85]"
+        alt=""
+        aria-hidden="true"
+        className="bg-photo absolute inset-0 w-full h-full object-cover brightness-[0.85]"
         style={{ animation: 'photoIn 1.8s cubic-bezier(0.16, 1, 0.3, 1) forwards', transform: 'scale(1.08)' }}
       />
 
@@ -76,14 +77,7 @@ export default function Home() {
       />
 
       {/* Main Content — left hero column */}
-      <div
-        className="absolute inset-y-0 left-0 z-[7] flex flex-col justify-center pointer-events-none"
-        style={{
-          padding: 'clamp(2rem, 6vh, 4rem) clamp(2rem, 5vw, 4.5rem)',
-          width: 'min(54vw, 640px)',
-          gap: 0,
-        }}
-      >
+      <div className="hero-column absolute inset-y-0 left-0 z-[7] flex flex-col justify-center pointer-events-none">
         {/* Claude Code Expert Badge */}
         <div style={{ marginBottom: '1.75rem' }}>
           <span
@@ -113,12 +107,12 @@ export default function Home() {
         <h1
           className="font-[Rubik] text-white"
           style={{
-            fontSize: 'clamp(3.25rem, 6.5vw, 5.5rem)',
+            fontSize: 'clamp(2.5rem, 8.5vw, 5.5rem)',
             lineHeight: 0.94,
             letterSpacing: '-0.04em',
             fontWeight: 700,
             fontVariationSettings: '"wdth" 92, "opsz" 96',
-            marginBottom: '1.5rem',
+            marginBottom: 'clamp(1rem, 2.5vw, 1.5rem)',
           }}
         >
           REMY<br />DE KLEIN
@@ -127,12 +121,12 @@ export default function Home() {
         <p
           className="font-[Inter]"
           style={{
-            fontSize: '0.78rem',
+            fontSize: 'clamp(0.7rem, 1.6vw, 0.78rem)',
             fontWeight: 400,
             letterSpacing: '0.24em',
             textTransform: 'uppercase',
             color: 'oklch(85% 0.015 55 / 0.75)',
-            marginBottom: '2rem',
+            marginBottom: 'clamp(1.25rem, 3vw, 2rem)',
           }}
         >
           Founder · Builder · Creative Director
@@ -143,19 +137,19 @@ export default function Home() {
             height: '1px',
             width: 56,
             background: 'oklch(78% 0.015 55 / 0.35)',
-            marginBottom: '1.5rem',
+            marginBottom: 'clamp(1rem, 2.5vw, 1.5rem)',
           }}
         />
 
         <p
           className="font-[Inter]"
           style={{
-            fontSize: '0.98rem',
+            fontSize: 'clamp(0.88rem, 1.8vw, 0.98rem)',
             lineHeight: 1.6,
             maxWidth: '42ch',
             color: 'oklch(90% 0.012 60 / 0.78)',
             fontWeight: 400,
-            marginBottom: '2.5rem',
+            marginBottom: 'clamp(1.5rem, 3.5vw, 2.5rem)',
           }}
         >
           Building immersive experiences for the world&apos;s most ambitious brands.
@@ -194,7 +188,7 @@ export default function Home() {
       <ProjectCards />
 
       {/* Curved Loop Text — subtle ribbon anchoring the bottom */}
-      <div className="absolute bottom-[-8px] left-0 right-0 z-[2] pointer-events-none">
+      <div className="marquee-ribbon absolute bottom-[-8px] left-0 right-0 z-[2] pointer-events-none">
         <CurvedLoop
           marqueeText="FOUNDER ✦ BUILDER ✦ CREATIVE ✦ AUGMENTO ✦ DUBAI ✦ IMMERSIVE 3D/AR EXPERIENCES ✦"
           speed={0.5}
@@ -205,11 +199,8 @@ export default function Home() {
         />
       </div>
 
-      {/* Bottom Bar - padded */}
-      <div
-        className="absolute bottom-0 left-0 right-0 z-[4] flex justify-end items-center"
-        style={{ padding: '2rem 8vw' }}
-      >
+      {/* Bottom Bar */}
+      <div className="location-bar absolute bottom-0 left-0 right-0 z-[4] flex justify-end items-center">
         <div className="font-[Inter] font-light text-[0.75rem] text-white/30 tracking-[0.15em] uppercase flex items-center gap-2">
           <span className="w-[5px] h-[5px] rounded-full bg-green-400" style={{ animation: 'pulse 2.5s ease-in-out infinite' }} />
           Dubai, UAE
