@@ -3,7 +3,7 @@ import "./globals.css";
 
 export const metadata: Metadata = {
   title: "Remy de Klein",
-  description: "Co-Founder of Augmento. Building the future of immersive experiences.",
+  description: "Building tech people love. Synesthesia powered.",
 };
 
 export const viewport: Viewport = {

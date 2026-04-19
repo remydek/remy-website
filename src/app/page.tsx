@@ -134,7 +134,7 @@ export default function Home() {
             marginBottom: 'clamp(1.25rem, 3vw, 2rem)',
           }}
         >
-          Founder · Builder · Creative Director
+          Co-Founder Augmento.com · Builder · Creative Director
         </p>
 
         <div
@@ -157,8 +157,7 @@ export default function Home() {
             marginBottom: 'clamp(1.5rem, 3.5vw, 2.5rem)',
           }}
         >
-          Building immersive experiences for the world&apos;s most ambitious brands.
-          Co-Founder of Augmento.
+          Building tech people love. Synesthesia powered.
         </p>
 
         {/* Buttons */}
