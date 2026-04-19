@@ -105,17 +105,22 @@ export default function Home() {
         </div>
 
         <h1
-          className="font-[Rubik] text-white"
+          aria-label="Remy de Klein"
           style={{
-            fontSize: 'clamp(2.5rem, 8.5vw, 5.5rem)',
-            lineHeight: 0.94,
-            letterSpacing: '-0.04em',
-            fontWeight: 700,
-            fontVariationSettings: '"wdth" 92, "opsz" 96',
+            margin: 0,
             marginBottom: 'clamp(1rem, 2.5vw, 1.5rem)',
+            lineHeight: 0,
           }}
         >
-          REMY<br />DE KLEIN
+          <img
+            src="/rdk.svg"
+            alt="Remy de Klein"
+            style={{
+              display: 'block',
+              width: 'clamp(200px, 32vw, 380px)',
+              height: 'auto',
+            }}
+          />
         </h1>
 
         <p
